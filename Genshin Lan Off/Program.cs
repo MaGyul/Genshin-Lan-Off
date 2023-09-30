@@ -21,6 +21,7 @@ namespace Genshin_Lan_Off
         public static bool ramShift = false;
         public static bool ramCtrl = false;
         public static bool ramAlt = false;
+        public static bool ramShowNoti = false;
         public static Dictionary<Keys, bool> spKeys = new Dictionary<Keys, bool>();
 
         /// <summary>
@@ -58,7 +59,12 @@ namespace Genshin_Lan_Off
             {
                 KeyboardHook.UnHook();
                 RegClose();
+                tray.Dispose();
                 components.Dispose();
+                if (fwRule != null && fwRule.Enabled)
+                {
+                    fwRule.Enabled = false;
+                }
             };
 
             tray.MouseClick += (object sender, MouseEventArgs args) =>
@@ -76,6 +82,13 @@ namespace Genshin_Lan_Off
             settings.Click += (object sender, EventArgs args) =>
             {
                 settingsForm.ShowDialog();
+            };
+            notiBox.Click += (object sender, EventArgs args) =>
+            {
+                ramShowNoti = !ramShowNoti;
+                settingsReg.SetValue("show_noti", ramShowNoti ? 1 : 0, RegistryValueKind.DWord);
+                settingsForm.showNoti.Checked = ramShowNoti;
+                Update();
             };
 
             KeyboardHook.SetHook(KeyboardHookProc);
@@ -122,6 +135,7 @@ namespace Genshin_Lan_Off
             statusBox.Visible = true;
             catchBox.Visible = true;
             shotBox.Visible = true;
+            notiBox.Visible = true;
 
             if (fwRule != null)
             {
@@ -134,6 +148,7 @@ namespace Genshin_Lan_Off
             if (ramShift) text += "Shift + ";
             text += ramShotKey.ToString();
             shotBox.Text = $"단축키: {text}";
+            notiBox.Text = $"알림: {(ramShowNoti ? "활성화" : "비활성화")}";
         }
 
         private static IntPtr KeyboardHookProc(int code, IntPtr wParam, IntPtr lParam)
@@ -201,14 +216,18 @@ namespace Genshin_Lan_Off
             if (settingsReg == null) return;
 
             settingsReg.Close();
+            settingsReg = null;
         }
 
         private static void ShowNoti(string title, string text, ToolTipIcon icon = ToolTipIcon.Info)
         {
-            tray.BalloonTipTitle = title;
-            tray.BalloonTipText = text;
-            tray.BalloonTipIcon = icon;
-            tray.ShowBalloonTip(0);
+            if (ramShowNoti)
+            {
+                tray.BalloonTipTitle = title;
+                tray.BalloonTipText = text;
+                tray.BalloonTipIcon = icon;
+                tray.ShowBalloonTip(0);
+            }
         }
 
         private static void InitializeComponent()
@@ -219,6 +238,7 @@ namespace Genshin_Lan_Off
             statusBox = new ToolStripMenuItem();
             catchBox = new ToolStripMenuItem();
             shotBox = new ToolStripMenuItem();
+            notiBox = new ToolStripMenuItem();
             _toolStripSeparator = new ToolStripSeparator();
             settings = new ToolStripMenuItem();
             exit = new ToolStripMenuItem();
@@ -237,6 +257,7 @@ namespace Genshin_Lan_Off
             statusBox,
             catchBox,
             shotBox,
+            notiBox,
             _toolStripSeparator,
             settings,
             exit});
@@ -267,6 +288,14 @@ namespace Genshin_Lan_Off
             shotBox.Size = new System.Drawing.Size(146, 22);
             shotBox.Text = "단축키: None";
             shotBox.Visible = false;
+            // 
+            // notiBox
+            // 
+            notiBox.Enabled = false;
+            notiBox.Name = "notiBox";
+            notiBox.Size = new System.Drawing.Size(146, 22);
+            notiBox.Text = "알림: None";
+            notiBox.Visible = false;
             // 
             // _toolStripSeparator
             // 
@@ -300,5 +329,6 @@ namespace Genshin_Lan_Off
         private static ToolStripMenuItem statusBox;
         private static ToolStripMenuItem catchBox;
         private static ToolStripMenuItem shotBox;
+        private static ToolStripMenuItem notiBox;
     }
 }

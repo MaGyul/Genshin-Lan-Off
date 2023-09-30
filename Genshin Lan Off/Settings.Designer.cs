@@ -40,6 +40,7 @@
             this.firewallName = new System.Windows.Forms.TextBox();
             this._firewall_label = new System.Windows.Forms.Label();
             this.panel3 = new System.Windows.Forms.Panel();
+            this.showNoti = new System.Windows.Forms.CheckBox();
             this.toolTip = new System.Windows.Forms.ToolTip(this.components);
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
@@ -98,7 +99,7 @@
             // applyBtn
             // 
             this.applyBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.applyBtn.Location = new System.Drawing.Point(7, 2);
+            this.applyBtn.Location = new System.Drawing.Point(7, 32);
             this.applyBtn.MaximumSize = new System.Drawing.Size(85, 25);
             this.applyBtn.MinimumSize = new System.Drawing.Size(85, 25);
             this.applyBtn.Name = "applyBtn";
@@ -110,7 +111,7 @@
             // cancelBtn
             // 
             this.cancelBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.cancelBtn.Location = new System.Drawing.Point(107, 2);
+            this.cancelBtn.Location = new System.Drawing.Point(107, 32);
             this.cancelBtn.MaximumSize = new System.Drawing.Size(85, 25);
             this.cancelBtn.MinimumSize = new System.Drawing.Size(85, 25);
             this.cancelBtn.Name = "cancelBtn";
@@ -159,20 +160,33 @@
             this.panel3.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.panel3.Controls.Add(this.showNoti);
             this.panel3.Controls.Add(this.applyBtn);
             this.panel3.Controls.Add(this.cancelBtn);
-            this.panel3.Location = new System.Drawing.Point(5, 137);
-            this.panel3.MaximumSize = new System.Drawing.Size(200, 30);
-            this.panel3.MinimumSize = new System.Drawing.Size(200, 30);
+            this.panel3.Location = new System.Drawing.Point(5, 130);
+            this.panel3.MaximumSize = new System.Drawing.Size(200, 60);
+            this.panel3.MinimumSize = new System.Drawing.Size(200, 60);
             this.panel3.Name = "panel3";
-            this.panel3.Size = new System.Drawing.Size(200, 30);
+            this.panel3.Size = new System.Drawing.Size(200, 60);
             this.panel3.TabIndex = 4;
+            // 
+            // showNoti
+            // 
+            this.showNoti.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.showNoti.AutoSize = true;
+            this.showNoti.Location = new System.Drawing.Point(16, 10);
+            this.showNoti.Name = "showNoti";
+            this.showNoti.Size = new System.Drawing.Size(76, 16);
+            this.showNoti.TabIndex = 3;
+            this.showNoti.Text = "알림 표시";
+            this.toolTip.SetToolTip(this.showNoti, "프로그램 실행, 활성화/비활성화 알림");
+            this.showNoti.UseVisualStyleBackColor = true;
             // 
             // Settings
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(209, 171);
+            this.ClientSize = new System.Drawing.Size(209, 196);
             this.ControlBox = false;
             this.Controls.Add(this.panel3);
             this.Controls.Add(this.panel2);
@@ -180,9 +194,9 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
-            this.MaximumSize = new System.Drawing.Size(225, 210);
+            this.MaximumSize = new System.Drawing.Size(225, 235);
             this.MinimizeBox = false;
-            this.MinimumSize = new System.Drawing.Size(225, 210);
+            this.MinimumSize = new System.Drawing.Size(225, 235);
             this.Name = "Settings";
             this.ShowIcon = false;
             this.Text = "설정";
@@ -191,6 +205,7 @@
             this.panel2.ResumeLayout(false);
             this.panel2.PerformLayout();
             this.panel3.ResumeLayout(false);
+            this.panel3.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -208,5 +223,6 @@
         private System.Windows.Forms.Label _firewall_label;
         private System.Windows.Forms.Panel panel3;
         private System.Windows.Forms.ToolTip toolTip;
+        public System.Windows.Forms.CheckBox showNoti;
     }
 }

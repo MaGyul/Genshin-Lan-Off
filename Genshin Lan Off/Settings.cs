@@ -24,15 +24,19 @@ namespace Genshin_Lan_Off
             shift = Program.ramShift = (int)Program.settingsReg.GetValue("shot_shift", 0) == 1;
             ctrl = Program.ramCtrl = (int)Program.settingsReg.GetValue("shot_ctrl", 0) == 1;
             alt = Program.ramAlt = (int)Program.settingsReg.GetValue("shot_alt", 0) == 1;
+            showNoti.Checked = Program.ramShowNoti = (int)Program.settingsReg.GetValue("show_noti", 1) == 1;
             firewallName.Text = Program.settingsReg.GetValue("firewall_name", "").ToString();
 
             try {
-                Program.UpdateFireWall(firewallName.Text);
+                if (Program.UpdateFireWall(firewallName.Text)) Program.Update();
             } catch (MethodAccessException) {}
 
-            Program.Update();
-
-            keyBox.Text = shotKey.ToString();
+            var text = "";
+            if (ctrl) text += "Ctrl + ";
+            if (alt) text += "Alt + ";
+            if (shift) text += "Shift + ";
+            text += shotKey.ToString();
+            keyBox.Text = text;
 
             editBtn.Click += EditBtn_Click;
             cancelBtn.Click += CancelBtn_Click;
@@ -56,7 +60,9 @@ namespace Genshin_Lan_Off
                     Program.settingsReg.SetValue("shot_shift", shift ? 1 : 0, Microsoft.Win32.RegistryValueKind.DWord);
                     Program.settingsReg.SetValue("shot_ctrl", ctrl ? 1 : 0, Microsoft.Win32.RegistryValueKind.DWord);
                     Program.settingsReg.SetValue("shot_alt", alt ? 1 : 0, Microsoft.Win32.RegistryValueKind.DWord);
+                    Program.settingsReg.SetValue("show_noti", showNoti.Checked ? 1 : 0, Microsoft.Win32.RegistryValueKind.DWord);
                     Program.settingsReg.SetValue("firewall_name", firewallName.Text, Microsoft.Win32.RegistryValueKind.String);
+                    Program.ramShowNoti = showNoti.Checked;
                     Program.ramShotKey = shotKey;
                     Program.ramShift = shift;
                     Program.ramCtrl = ctrl;
