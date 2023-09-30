@@ -59,6 +59,10 @@ namespace Genshin_Lan_Off
                 KeyboardHook.UnHook();
                 RegClose();
                 components.Dispose();
+                if (fwRule != null && fwRule.Enabled)
+                {
+                    fwRule.Enabled = false;
+                }
             };
 
             tray.MouseClick += (object sender, MouseEventArgs args) =>
