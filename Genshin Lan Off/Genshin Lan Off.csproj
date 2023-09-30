@@ -113,7 +113,6 @@
     <EmbeddedResource Include="Settings.resx">
       <DependentUpon>Settings.cs</DependentUpon>
     </EmbeddedResource>
-    <None Include="Genshin Lan Off_TemporaryKey.pfx" />
     <None Include="Properties\app.manifest" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -140,12 +139,6 @@
     </COMReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Icon.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icon.ico" />
-  </ItemGroup>
-  <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.6.2">
       <Visible>False</Visible>
       <ProductName>Microsoft .NET Framework 4.6.2%28x86 및 x64%29</ProductName>
@@ -158,34 +151,7 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Icon_16.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icon_24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icon_32.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icon_16.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icon_24.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icon_32.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icon_64.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icon_48.ico" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\IconGroup103.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Icon.svg" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
