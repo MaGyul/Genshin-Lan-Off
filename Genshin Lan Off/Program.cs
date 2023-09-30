@@ -205,6 +205,7 @@ namespace Genshin_Lan_Off
             if (settingsReg == null) return;
 
             settingsReg.Close();
+            settingsReg = null;
         }
 
         private static void ShowNoti(string title, string text, ToolTipIcon icon = ToolTipIcon.Info)
