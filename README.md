@@ -1,7 +1,7 @@
 [![MSBuild](https://github.com/MaGyul/Genshin-Lan-Off/actions/workflows/msbuild.yml/badge.svg)](https://github.com/MaGyul/Genshin-Lan-Off/actions/workflows/msbuild.yml)
 
 # Genshin Lan Off
-> 원신 랜선 뽑기는 인터넷이 연결되는 시간도 오래걸리는 단점을 방화벽을 이용해서 보완을 한 프로그램
+> 원신 랜선 뽑기는 인터넷이 연결되는 시간도 오래걸리는 단점을 방화벽을 이용해서 보완을 한 프로그램<br>
 > MS 스토어에선 원신이라는 글자가 들어간 제품 이름을 사용할 수 없어 [덕후 게임 인터넷 유틸](https://www.microsoft.com/store/apps/9N0MSQV2FT5C)로 올라가 있습니다.
 
 
