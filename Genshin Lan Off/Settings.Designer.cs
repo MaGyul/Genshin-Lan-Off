@@ -71,6 +71,7 @@
             this.editBtn.Size = new System.Drawing.Size(85, 25);
             this.editBtn.TabIndex = 2;
             this.editBtn.Text = "변경";
+            this.toolTip.SetToolTip(this.editBtn, "키 변경하기");
             this.editBtn.UseVisualStyleBackColor = true;
             this.editBtn.PreviewKeyDown += new System.Windows.Forms.PreviewKeyDownEventHandler(this.Settings_KeyPress);
             // 

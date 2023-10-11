@@ -14,18 +14,23 @@ namespace Genshin_Lan_Off
         private bool ctrl = false;
         private bool alt = false;
 
-        private bool editBtnKeyInput = false;
-
         public Settings()
         {
             InitializeComponent();
 
-            shotKey = Program.ramShotKey = (Keys)Program.settingsReg.GetValue("shot_key", 0);
-            shift = Program.ramShift = (int)Program.settingsReg.GetValue("shot_shift", 0) == 1;
-            ctrl = Program.ramCtrl = (int)Program.settingsReg.GetValue("shot_ctrl", 0) == 1;
-            alt = Program.ramAlt = (int)Program.settingsReg.GetValue("shot_alt", 0) == 1;
-            showNoti.Checked = Program.ramShowNoti = (int)Program.settingsReg.GetValue("show_noti", 1) == 1;
-            firewallName.Text = Program.settingsReg.GetValue("firewall_name", "").ToString();
+            var ini = new IniFile();
+
+            if (File.Exists(GetInIPath()))
+            {
+                ini.Load(GetInIPath());
+            }
+
+            shotKey = Program.ramShotKey = (Keys)ini["shotKey"]["key"].ToInt(0);
+            shift = Program.ramShift = ini["shotKey"]["shift"].ToBool(false);
+            ctrl = Program.ramCtrl = ini["shotKey"]["ctrl"].ToBool(false);
+            alt = Program.ramAlt = ini["shotKey"]["alt"].ToBool(false);
+            showNoti.Checked = Program.ramShowNoti = ini["noti"]["show"].ToBool(true);
+            firewallName.Text = ini["firewall"]["name"].GetString();
 
             try {
                 if (Program.UpdateFireWall(firewallName.Text)) Program.Update();
@@ -56,18 +61,29 @@ namespace Genshin_Lan_Off
             {
                 if (Program.UpdateFireWall(firewallName.Text))
                 {
-                    Program.settingsReg.SetValue("shot_key", (int)shotKey, Microsoft.Win32.RegistryValueKind.DWord);
-                    Program.settingsReg.SetValue("shot_shift", shift ? 1 : 0, Microsoft.Win32.RegistryValueKind.DWord);
-                    Program.settingsReg.SetValue("shot_ctrl", ctrl ? 1 : 0, Microsoft.Win32.RegistryValueKind.DWord);
-                    Program.settingsReg.SetValue("shot_alt", alt ? 1 : 0, Microsoft.Win32.RegistryValueKind.DWord);
-                    Program.settingsReg.SetValue("show_noti", showNoti.Checked ? 1 : 0, Microsoft.Win32.RegistryValueKind.DWord);
-                    Program.settingsReg.SetValue("firewall_name", firewallName.Text, Microsoft.Win32.RegistryValueKind.String);
+                    var ini = new IniFile();
+
+                    ini["shotKey"]["key"] = (int)shotKey;
+                    ini["shotKey"]["shift"] = shift;
+                    ini["shotKey"]["ctrl"] = ctrl;
+                    ini["shotKey"]["alt"] = alt;
+                    ini["noti"]["show"] = showNoti.Checked;
+                    ini["firewall"]["name"] = firewallName.Text;
                     Program.ramShowNoti = showNoti.Checked;
                     Program.ramShotKey = shotKey;
                     Program.ramShift = shift;
                     Program.ramCtrl = ctrl;
                     Program.ramAlt = alt;
                     Program.Update();
+
+                    try
+                    {
+                        ini.Save(GetInIPath());
+                    } 
+                    catch (IOException)
+                    {
+                        MessageBox.Show(this, "설정 파일을 저장하지 못했습니다.", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
                     Close();
                 }
                 else
@@ -135,58 +151,63 @@ namespace Genshin_Lan_Off
 
         private void EditBtn_Click(object sender, EventArgs e)
         {
-            if (editBtnKeyInput)
-            {
-                toolTip.Show("변경 버튼은 마우스로 조작해주세요.", editBtn, 1000);
-                editBtnKeyInput = false;
-                return;
-            }
-
             if (editKey)
             {
+                if (shotKey == Keys.None)
+                {
+                    MessageBox.Show(this, "키 설정이 완료되지 않았습니다.", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
                 _key_label.Text = "실행 단축키";
                 editBtn.Text = "변경";
                 editKey = false;
             }
             else
             {
+                keyBox.Text = "";
                 _key_label.Text = "실행 단축키 (키 인식 중)";
                 editBtn.Text = "완료";
                 editKey = true;
             }
         }
 
-        public void onKey(Keys key, bool shift, bool ctrl, bool alt, bool keyup)
+        public void onKey(KeyEventArgs e, bool keyup)
         {
             if (editKey)
             {
+                var is_sp = false;
+                var ctrl = e.Control;
+                var alt = e.Alt;
+                var shift = e.Shift;
+                var key = e.KeyCode;
+                if (key == Keys.LShiftKey || key == Keys.LControlKey || key == Keys.LMenu)
+                {
+                    shotKey = Keys.None;
+                    is_sp = true;
+                }
+
                 var text = "";
                 if (ctrl) text += "Ctrl + ";
                 if (alt) text += "Alt + ";
                 if (shift) text += "Shift + ";
-                text += key.ToString();
-                keyBox.Text = text;
-                shotKey = key;
-                this.shift = shift;
-                this.ctrl = ctrl;
-                this.alt = alt;
-                if (keyup)
+                if (keyup && !is_sp)
                 {
+                    text += key.ToString();
+                    editKey = false;
+                    shotKey = key;
+                    this.shift = shift;
+                    this.ctrl = ctrl;
+                    this.alt = alt;
                     _key_label.Text = "실행 단축키";
                     editBtn.Text = "변경";
-                    editKey = false;
+                    keyBox.Text = text;
                 }
+                else keyBox.Text = text;
             }
         }
 
         private void Settings_KeyPress(object sender, PreviewKeyDownEventArgs e)
         {
-            if (sender == editBtn)
-            {
-                editBtnKeyInput = true;
-                return;
-            }
-
             if (e.KeyCode == Keys.Enter)
             {
                 Apply();
@@ -195,6 +216,17 @@ namespace Genshin_Lan_Off
             {
                 Close();
             }
+        }
+
+        private string GetInIPath()
+        {
+            var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            var path = appData + "\\GLO";
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
+            return path + "\\settings.ini";
         }
     }
 }

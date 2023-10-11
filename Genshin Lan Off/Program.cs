@@ -1,19 +1,19 @@
 ﻿using Genshin_LAN_Off.Properties;
-using Microsoft.Win32;
 using NetFwTypeLib;
 using System;
-using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Security.Principal;
 using System.Windows.Forms;
 
 namespace Genshin_Lan_Off
 {
     public static class Program
     {
-        private static INetFwPolicy2 policy = (INetFwPolicy2)Activator.CreateInstance(Type.GetTypeFromProgID("HNetCfg.FwPolicy2"));
+        private static KeyboardHook kHook = new KeyboardHook();
+        private static readonly INetFwPolicy2 policy = (INetFwPolicy2)Activator.CreateInstance(Type.GetTypeFromProgID("HNetCfg.FwPolicy2"));
 
-        public static RegistryKey settingsReg;
         private static Settings settingsForm;
         private static INetFwRule fwRule = null;
 
@@ -22,14 +22,28 @@ namespace Genshin_Lan_Off
         public static bool ramCtrl = false;
         public static bool ramAlt = false;
         public static bool ramShowNoti = false;
-        public static Dictionary<Keys, bool> spKeys = new Dictionary<Keys, bool>();
 
-        /// <summary>
-        /// 해당 애플리케이션의 주 진입점입니다.
-        /// </summary>
         [STAThread]
         static void Main()
         {
+            if (IsAdministrator() == false)
+            {
+                try
+                {
+                    ProcessStartInfo procInfo = new ProcessStartInfo();
+                    procInfo.UseShellExecute = true;
+                    procInfo.FileName = Application.ExecutablePath;
+                    procInfo.WorkingDirectory = Environment.CurrentDirectory;
+                    procInfo.Verb = "runas";
+                    Process.Start(procInfo);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message.ToString(), "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                return;
+            }
+
             if (!FireWallEnabled())
             {
                 var result = MessageBox.Show("원신 랜뽑은 방화벽을 이용해서 원신 인터넷을 차단합니다\n방화벽을 켜시곘습니까?", "방화벽 꺼져있음", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
@@ -49,16 +63,11 @@ namespace Genshin_Lan_Off
 
             InitializeComponent();
 
-            spKeys[Keys.LShiftKey] = spKeys[Keys.LControlKey] = spKeys[Keys.LMenu] = false;
-
-            settingsReg = Registry.CurrentUser.CreateSubKey("Software").CreateSubKey("GenshinLanOff");
-
             settingsForm = new Settings();
 
             Application.ApplicationExit += (object sender, EventArgs args) =>
             {
-                KeyboardHook.UnHook();
-                RegClose();
+                kHook.Unhook();
                 tray.Dispose();
                 components.Dispose();
                 if (fwRule != null && fwRule.Enabled)
@@ -83,15 +92,10 @@ namespace Genshin_Lan_Off
             {
                 settingsForm.ShowDialog();
             };
-            notiBox.Click += (object sender, EventArgs args) =>
-            {
-                ramShowNoti = !ramShowNoti;
-                settingsReg.SetValue("show_noti", ramShowNoti ? 1 : 0, RegistryValueKind.DWord);
-                settingsForm.showNoti.Checked = ramShowNoti;
-                Update();
-            };
 
-            KeyboardHook.SetHook(KeyboardHookProc);
+            kHook.Hook();
+            kHook.KeyUp += KHook_KeyUp;
+            kHook.KeyDown += KHook_KeyDown;
             ShowNoti("원신 랜뽑", "원신 랜뽑이 실행되었습니다.\n트레이에서 보실 수 있습니다.");
 
             Application.Run();
@@ -151,72 +155,43 @@ namespace Genshin_Lan_Off
             notiBox.Text = $"알림: {(ramShowNoti ? "활성화" : "비활성화")}";
         }
 
-        private static IntPtr KeyboardHookProc(int code, IntPtr wParam, IntPtr lParam)
+        private static void KHook_KeyDown(object sender, KeyEventArgs e)
         {
-            if (code >= 0)
+            if (settingsForm.Visible)
             {
-                Keys key = KeyboardHook.ReadKey(lParam);
-                if (wParam == (IntPtr)KeyboardHook.WM_KEYUP)
-                {
-                    if (key == Keys.LControlKey || key == Keys.LMenu || key == Keys.LShiftKey)
-                    {
-                        spKeys[key] = false;
-                        return KeyboardHook.NextHook(code, (int)wParam, lParam);
-                    }
-
-                    if (settingsForm.Visible)
-                    {
-                        settingsForm.onKey(key, spKeys[Keys.LShiftKey], spKeys[Keys.LControlKey], spKeys[Keys.LMenu], true);
-                    }
-                    else
-                    {
-                        if (spKeys[Keys.LControlKey] == ramCtrl &&
-                            spKeys[Keys.LShiftKey] == ramShift &&
-                            spKeys[Keys.LMenu] == ramAlt &&
-                            key == ramShotKey)
-                        {
-                            if (fwRule != null)
-                            {
-                                if (fwRule.Enabled)
-                                {
-                                    fwRule.Enabled = false;
-                                    ShowNoti("랜뽑 상태", "랜뽑이 비활성화 되었습니다.");
-                                }
-                                else
-                                {
-                                    fwRule.Enabled = true;
-                                    ShowNoti("랜뽑 상태", "랜뽑이 활성화 되었습니다.");
-                                }
-                                statusBox.Text = $"상태: {(fwRule.Enabled ? "활성화" : "비활성화")}";
-                            }
-                        }
-                    }
-                }
-                else if (wParam == (IntPtr)KeyboardHook.WM_KEYDOWN || wParam == (IntPtr)KeyboardHook.WM_SYSKEYDOWN)
-                {
-                    if (key == Keys.LControlKey || key == Keys.LMenu || key == Keys.LShiftKey)
-                    {
-                        spKeys[key] = true;
-                        if (settingsForm.Visible)
-                        {
-                            settingsForm.onKey(Keys.None, spKeys[Keys.LShiftKey], spKeys[Keys.LControlKey], spKeys[Keys.LMenu], false);
-                        }
-                    }
-                }
-                return KeyboardHook.NextHook(code, (int)wParam, lParam);
-            }
-            else
-            {
-                return KeyboardHook.NextHook(code, (int)wParam, lParam);
+                settingsForm.onKey(e, false);
             }
         }
 
-        private static void RegClose()
+        private static void KHook_KeyUp(object sender, KeyEventArgs e)
         {
-            if (settingsReg == null) return;
-
-            settingsReg.Close();
-            settingsReg = null;
+            if (settingsForm.Visible)
+            {
+                settingsForm.onKey(e, true);
+            }
+            else
+            {
+                if (e.Control == ramCtrl &&
+                    e.Shift == ramShift &&
+                    e.Alt == ramAlt &&
+                    e.KeyCode == ramShotKey)
+                {
+                    if (fwRule != null)
+                    {
+                        if (fwRule.Enabled)
+                        {
+                            fwRule.Enabled = false;
+                            ShowNoti("랜뽑 상태", "랜뽑이 비활성화 되었습니다.");
+                        }
+                        else
+                        {
+                            fwRule.Enabled = true;
+                            ShowNoti("랜뽑 상태", "랜뽑이 활성화 되었습니다.");
+                        }
+                        statusBox.Text = $"상태: {(fwRule.Enabled ? "활성화" : "비활성화")}";
+                    }
+                }
+            }
         }
 
         private static void ShowNoti(string title, string text, ToolTipIcon icon = ToolTipIcon.Info)
@@ -330,5 +305,16 @@ namespace Genshin_Lan_Off
         private static ToolStripMenuItem catchBox;
         private static ToolStripMenuItem shotBox;
         private static ToolStripMenuItem notiBox;
+
+        public static bool IsAdministrator()
+        {
+            WindowsIdentity identity = WindowsIdentity.GetCurrent();
+            if (null != identity)
+            {
+                WindowsPrincipal principal = new WindowsPrincipal(identity);
+                return principal.IsInRole(WindowsBuiltInRole.Administrator);
+            }
+            return false;
+        }
     }
 }

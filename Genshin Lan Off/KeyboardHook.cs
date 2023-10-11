@@ -1,61 +1,99 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace Genshin_Lan_Off
 {
     public class KeyboardHook
     {
+        // Native Start
         [DllImport("user32.dll")]
-        static extern IntPtr SetWindowsHookEx(int idHook, LowLevelKeyboardProc callback, IntPtr hInstance, uint threadId);
-
+        static extern IntPtr SetWindowsHookEx(int idHook, KeyboardHookProc callback, IntPtr hInstance, uint threadId);
         [DllImport("user32.dll")]
         static extern bool UnhookWindowsHookEx(IntPtr hInstance);
-
         [DllImport("user32.dll")]
-        static extern IntPtr CallNextHookEx(IntPtr idHook, int nCode, int wParam, IntPtr lParam);
-
+        static extern int CallNextHookEx(IntPtr idHook, int nCode, int wParam, ref KeyboardHookStruct IParam);
+        [DllImport("user32.dll")]
+        static extern short GetKeyState(int nCode);
         [DllImport("kernel32.dll")]
-        static extern IntPtr LoadLibrary(string lpFileName);
+        static extern IntPtr LoadLibrary(string IpFileName);   // 라이브러리 등록
+        // Native End
 
-        public delegate IntPtr LowLevelKeyboardProc(int nCode, IntPtr wParam, IntPtr lParam);
+        public delegate int KeyboardHookProc(int code, int wParam, ref KeyboardHookStruct IParam);     // callback Delegate
 
-        private static readonly int WH_KEYBOARD_LL = 13;
-        public static readonly int WM_KEYDOWN = 0x100;
-        public static readonly int WM_KEYUP = 0x101;
-        public static readonly int WM_SYSKEYDOWN = 0x104;
-        public static readonly int WM_SYSKEYUP = 0x105;
+        // keyboardHookStruct 구조체 정의
+        public struct KeyboardHookStruct
+        {
+            public int vkCode;
+            public int scanCode;
+            public int flags;
+            public int time;
+            public int dwExtraInfo;
+        }
 
-        private static IntPtr hook = IntPtr.Zero;
+        // 정의 되어 있는 상수 값
+        const int VK_SHIFT = 0x10;
+        const int VK_CONTROL = 0x11;
+        const int VK_MENU = 0x12;
 
-        public static void SetHook(LowLevelKeyboardProc callback)
+        const int WH_KEYBOARD_LL = 13;
+        const int WM_KEYDOWN = 0x100;
+        const int WM_KEYUP = 0x101;
+        const int WM_SYSKEYDOWN = 0x104;
+        const int WM_SYSKEYUP = 0x105;
+
+        private KeyboardHookProc khp;
+        IntPtr hhook = IntPtr.Zero;
+
+        public event KeyEventHandler KeyDown;
+        public event KeyEventHandler KeyUp;
+
+
+        public KeyboardHook()
+        {
+            khp = new KeyboardHookProc(hookproc);
+        }
+
+        public void Hook()
         {
             IntPtr hInstance = LoadLibrary("User32");
-
-            hook = SetWindowsHookEx(WH_KEYBOARD_LL, callback, hInstance, 0);
+            hhook = SetWindowsHookEx(WH_KEYBOARD_LL, khp, hInstance, 0);
         }
 
-        public static void UnHook()
+        public void Unhook()
         {
-            if (hook == IntPtr.Zero) return;
-
-            UnhookWindowsHookEx(hook);
-
-            hook = IntPtr.Zero;
+            UnhookWindowsHookEx(hhook);
         }
 
-        public static IntPtr NextHook(int nCode, int wParam, IntPtr lParam)
+        public int hookproc(int code, int wParam, ref KeyboardHookStruct IParam)
         {
-            return CallNextHookEx(hook, nCode, wParam, lParam);
-        }
+            if (code >= 0)
+            {
+                Keys key = (Keys)IParam.vkCode;
+                if ((GetKeyState(VK_CONTROL) & 0x80) != 0)
+                    key |= Keys.Control;
+                if ((GetKeyState(VK_MENU) & 0x80) != 0)
+                    key |= Keys.Alt;
+                if ((GetKeyState(VK_SHIFT) & 0x80) != 0)
+                    key |= Keys.Shift;
 
-        public static Keys ReadKey(IntPtr lParam)
-        {
-            return (Keys) Marshal.ReadInt32(lParam);
+                KeyEventArgs kea = new KeyEventArgs(key);
+                if ((wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN) && (KeyDown != null))
+                {
+                    KeyDown(this, kea);
+                }
+                else if ((wParam == WM_KEYUP || wParam == WM_SYSKEYUP) && (KeyUp != null))
+                {
+                    KeyUp(this, kea);
+                }
+                if (kea.Handled)
+                    return 1;
+
+            }
+
+            return CallNextHookEx(hhook, code, wParam, ref IParam);
         }
     }
 }
