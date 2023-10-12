@@ -30,17 +30,16 @@ namespace Genshin_Lan_Off
             {
                 try
                 {
-                    ProcessStartInfo procInfo = new ProcessStartInfo();
-                    procInfo.UseShellExecute = true;
-                    procInfo.FileName = Application.ExecutablePath;
-                    procInfo.WorkingDirectory = Environment.CurrentDirectory;
-                    procInfo.Verb = "runas";
+                    ProcessStartInfo procInfo = new ProcessStartInfo
+                    {
+                        UseShellExecute = true,
+                        FileName = Application.ExecutablePath,
+                        WorkingDirectory = Environment.CurrentDirectory,
+                        Verb = "runas"
+                    };
                     Process.Start(procInfo);
                 }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.Message.ToString(), "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
+                catch (Exception) { }
                 return;
             }
 
