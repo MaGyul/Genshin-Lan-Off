@@ -93,9 +93,9 @@
             this._key_label.AutoSize = true;
             this._key_label.Location = new System.Drawing.Point(3, 3);
             this._key_label.Name = "_key_label";
-            this._key_label.Size = new System.Drawing.Size(97, 12);
+            this._key_label.Size = new System.Drawing.Size(69, 12);
             this._key_label.TabIndex = 0;
-            this._key_label.Text = "랜뽑 실행 단축키";
+            this._key_label.Text = "실행 단축키";
             // 
             // applyBtn
             // 

@@ -45,7 +45,7 @@ namespace Genshin_Lan_Off
 
             if (!FireWallEnabled())
             {
-                var result = MessageBox.Show("원신 랜뽑은 방화벽을 이용해서 원신 인터넷을 차단합니다\n방화벽을 켜시곘습니까?", "방화벽 꺼져있음", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                var result = MessageBox.Show("원신 방화벽 핫키는 방화벽을 이용해서 원신 인터넷을 차단합니다\n방화벽을 켜시곘습니까?", "방화벽 꺼져있음", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
                 if (result == DialogResult.Yes)
                 {
                     if (FireWallEnabled(true))
@@ -102,7 +102,7 @@ namespace Genshin_Lan_Off
             kHook.Hook();
             kHook.KeyUp += KHook_KeyUp;
             kHook.KeyDown += KHook_KeyDown;
-            ShowNoti("원신 랜뽑", "원신 랜뽑이 실행되었습니다.\n트레이에서 보실 수 있습니다.");
+            ShowNoti("원신 방화벽 핫키", "원신 방화벽 핫키가 실행되었습니다.\n트레이에서 보실 수 있습니다.");
 
             Application.Run();
         }
@@ -135,7 +135,7 @@ namespace Genshin_Lan_Off
             fwRule = rules.FirstOrDefault(rule => rule.Name == name);
 
             if (fwRule.Direction != NET_FW_RULE_DIRECTION_.NET_FW_RULE_DIR_OUT) throw new MethodAccessException("아웃바이트 규칙이 아닙니다.");
-            if (fwRule.Action != NET_FW_ACTION_.NET_FW_ACTION_BLOCK) throw new MethodAccessException("원신 랜뽑을 위해 방화벽 규칙이 연결 차단이여야 합니다.");
+            if (fwRule.Action != NET_FW_ACTION_.NET_FW_ACTION_BLOCK) throw new MethodAccessException("인터넷 차단을 위해 방화벽 규칙이 연결 차단이여야 합니다.");
             if (!fwRule.ApplicationName.Contains("GenshinImpact.exe")) throw new MethodAccessException("해당 방화벽 규칙은 GenshinImpact.exe으로 지정되어 있지 않습니다.");
 
             return true;
@@ -188,12 +188,12 @@ namespace Genshin_Lan_Off
                         if (fwRule.Enabled)
                         {
                             fwRule.Enabled = false;
-                            ShowNoti("랜뽑 상태", "랜뽑이 비활성화 되었습니다.");
+                            ShowNoti("상태", "방화벽 규칙이 비활성화 되었습니다.");
                         }
                         else
                         {
                             fwRule.Enabled = true;
-                            ShowNoti("랜뽑 상태", "랜뽑이 활성화 되었습니다.");
+                            ShowNoti("상태", "방화벽 규칙이 활성화 되었습니다.");
                         }
                         statusBox.Text = $"상태: {(fwRule.Enabled ? "활성화" : "비활성화")}";
                     }
@@ -230,7 +230,7 @@ namespace Genshin_Lan_Off
             // 
             tray.ContextMenuStrip = contextMenu;
             tray.Icon = Resources.IconGroup103;
-            tray.Text = "원신 랜뽑";
+            tray.Text = "원신 방화벽 핫키";
             tray.Visible = true;
             // 
             // contextMenu
@@ -252,7 +252,6 @@ namespace Genshin_Lan_Off
             statusBox.ForeColor = System.Drawing.SystemColors.ControlText;
             statusBox.Name = "statusBox";
             statusBox.Size = new System.Drawing.Size(146, 22);
-            statusBox.Text = "상태: None";
             statusBox.Visible = false;
             // 
             // catchBox
@@ -260,7 +259,6 @@ namespace Genshin_Lan_Off
             catchBox.Enabled = false;
             catchBox.Name = "catchBox";
             catchBox.Size = new System.Drawing.Size(146, 22);
-            catchBox.Text = "방화벽: None";
             catchBox.Visible = false;
             // 
             // shotBox
@@ -268,7 +266,6 @@ namespace Genshin_Lan_Off
             shotBox.Enabled = false;
             shotBox.Name = "shotBox";
             shotBox.Size = new System.Drawing.Size(146, 22);
-            shotBox.Text = "단축키: None";
             shotBox.Visible = false;
             // 
             // notiBox
@@ -276,7 +273,6 @@ namespace Genshin_Lan_Off
             notiBox.Enabled = false;
             notiBox.Name = "notiBox";
             notiBox.Size = new System.Drawing.Size(146, 22);
-            notiBox.Text = "알림: None";
             notiBox.Visible = false;
             // 
             // _toolStripSeparator

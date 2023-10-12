@@ -108,7 +108,7 @@ namespace Genshin_Lan_Off
                                     var rule = (INetFwRule)Activator.CreateInstance(Type.GetTypeFromProgID("HNetCfg.FWRule"));
 
                                     rule.Name = firewallName.Text;
-                                    rule.Description = "원신 랜뽑 프로그램이 생성한 규칙";
+                                    rule.Description = "원신 방화벽 핫키 프로그램이 생성한 규칙";
                                     rule.Direction = NET_FW_RULE_DIRECTION_.NET_FW_RULE_DIR_OUT;
                                     rule.Enabled = false;
                                     rule.ApplicationName = gameExe;
