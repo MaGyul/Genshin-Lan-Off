@@ -48,8 +48,15 @@ namespace Genshin_Lan_Off
                 var result = MessageBox.Show("원신 랜뽑은 방화벽을 이용해서 원신 인터넷을 차단합니다\n방화벽을 켜시곘습니까?", "방화벽 꺼져있음", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
                 if (result == DialogResult.Yes)
                 {
-                    FireWallEnabled(true);
-                    MessageBox.Show("방화벽을 켰습니다.", "정보", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    if (FireWallEnabled(true))
+                    {
+                        MessageBox.Show("방화벽을 켰습니다.", "정보", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    } 
+                    else
+                    {
+                        MessageBox.Show("방화벽을 켤수없습니다.", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
                 }
                 else
                 {
@@ -108,6 +115,7 @@ namespace Genshin_Lan_Off
             {
                 policy.FirewallEnabled[NET_FW_PROFILE_TYPE2_.NET_FW_PROFILE2_PRIVATE] = true;
                 policy.FirewallEnabled[NET_FW_PROFILE_TYPE2_.NET_FW_PROFILE2_PUBLIC] = true;
+                enabled = policy.FirewallEnabled[NET_FW_PROFILE_TYPE2_.NET_FW_PROFILE2_PUBLIC] && policy.FirewallEnabled[NET_FW_PROFILE_TYPE2_.NET_FW_PROFILE2_PRIVATE];
             }
 
             return enabled;
