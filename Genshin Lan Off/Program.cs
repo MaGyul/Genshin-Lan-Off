@@ -1,4 +1,5 @@
-﻿using Genshin_LAN_Off.Properties;
+﻿using Genshin_LAN_Off;
+using Genshin_LAN_Off.Properties;
 using NetFwTypeLib;
 using System;
 using System.Diagnostics;
@@ -22,6 +23,8 @@ namespace Genshin_Lan_Off
         public static bool ramCtrl = false;
         public static bool ramAlt = false;
         public static bool ramShowNoti = false;
+
+        private static bool dispose = false;
 
         [STAThread]
         static void Main()
@@ -73,6 +76,7 @@ namespace Genshin_Lan_Off
 
             Application.ApplicationExit += (object sender, EventArgs args) =>
             {
+                if (dispose) return;
                 kHook.Unhook();
                 tray.Dispose();
                 components.Dispose();
@@ -92,6 +96,14 @@ namespace Genshin_Lan_Off
             };
             exit.Click += (object sender, EventArgs args) =>
             {
+                kHook.Unhook();
+                tray.Dispose();
+                components.Dispose();
+                if (fwRule != null && fwRule.Enabled)
+                {
+                    fwRule.Enabled = false;
+                }
+                dispose = true;
                 Application.Exit();
             };
             settings.Click += (object sender, EventArgs args) =>

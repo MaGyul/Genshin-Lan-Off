@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace Genshin_Lan_Off
@@ -9,16 +10,16 @@ namespace Genshin_Lan_Off
     public class KeyboardHook
     {
         // Native Start
-        [DllImport("user32.dll")]
+        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         static extern IntPtr SetWindowsHookEx(int idHook, KeyboardHookProc callback, IntPtr hInstance, uint threadId);
-        [DllImport("user32.dll")]
+        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         static extern bool UnhookWindowsHookEx(IntPtr hInstance);
-        [DllImport("user32.dll")]
+        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         static extern int CallNextHookEx(IntPtr idHook, int nCode, int wParam, ref KeyboardHookStruct IParam);
-        [DllImport("user32.dll")]
+        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         static extern short GetKeyState(int nCode);
-        [DllImport("kernel32.dll")]
-        static extern IntPtr LoadLibrary(string IpFileName);   // 라이브러리 등록
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        private static extern IntPtr GetModuleHandle(string lpModuleName);
         // Native End
 
         public delegate int KeyboardHookProc(int code, int wParam, ref KeyboardHookStruct IParam);     // callback Delegate
@@ -58,8 +59,11 @@ namespace Genshin_Lan_Off
 
         public void Hook()
         {
-            IntPtr hInstance = LoadLibrary("User32");
-            hhook = SetWindowsHookEx(WH_KEYBOARD_LL, khp, hInstance, 0);
+            using (Process curProcess = Process.GetCurrentProcess())
+            using (ProcessModule curModule = curProcess.MainModule)
+            {
+                hhook = SetWindowsHookEx(WH_KEYBOARD_LL, khp, GetModuleHandle(curModule.ModuleName), 0);
+            }
         }
 
         public void Unhook()
@@ -88,9 +92,6 @@ namespace Genshin_Lan_Off
                 {
                     KeyUp(this, kea);
                 }
-                if (kea.Handled)
-                    return 1;
-
             }
 
             return CallNextHookEx(hhook, code, wParam, ref IParam);
