@@ -171,7 +171,7 @@ namespace Genshin_Lan_Off
             }
         }
 
-        public void onKey(KeyEventArgs e, bool keyup)
+        public void OnKey(KeyEventArgs e, bool keyup)
         {
             if (editKey)
             {
